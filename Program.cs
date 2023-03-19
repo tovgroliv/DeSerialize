@@ -7,15 +7,28 @@ namespace DeSerialize
 	{
 		static void Main(string[] args)
 		{
-			ListRand list = new ListRand();
+			for (int i = 0; i < 100; i++)
+			{
+				Test(i);
+			}
 
-			for (int i = 0; i < 10; i++)
+			Console.ReadKey();
+		}
+
+		static void Test(int number)
+		{
+			Console.Write($"Test #{number} - ");
+
+			ListRand list = new ListRand();
+			Random rand = new Random();
+
+			for (int i = 0; i < rand.Next(10, 20); i++)
 			{
 				list.Push(i.ToString());
 			}
 
 			list.Randomize();
-			list.Print();
+			string first = list.ToString();
 
 			string path = "dump.txt";
 
@@ -26,7 +39,7 @@ namespace DeSerialize
 
 			using (File.Create(path))
 			{
-
+				
 			}
 
 			using (StreamWriter s = new StreamWriter(path))
@@ -38,9 +51,18 @@ namespace DeSerialize
 			{
 				list.Deserialize(s);
 			}
-			list.Print();
+			string second = list.ToString();
 
-			Console.ReadKey();
+			if (first == second)
+			{
+				Console.WriteLine("true");
+			}
+			else
+			{
+				Console.WriteLine("false");
+				Console.WriteLine(first);
+				Console.WriteLine(second);
+			}
 		}
 	}
 
@@ -63,8 +85,9 @@ namespace DeSerialize
 			Head = 0, Local = 1, Reverse = 2, Tail = 3
 		}
 
-		public void Print()
+		public override string ToString()
 		{
+			string output = "";
 			ListNode active = Head;
 			for (int i = 0; i < Count; i++)
 			{
@@ -73,10 +96,11 @@ namespace DeSerialize
 				{
 					rand = $"({active.Rand.Data})";
 				}
-				Console.Write($"{active.Data}{rand} ");
+				output += $"{active.Data}{rand} ";
 				active = active.Next;
 			}
-			Console.WriteLine();
+
+			return output;
 		}
 
 		public void Push(string data)
@@ -192,10 +216,8 @@ namespace DeSerialize
 				{
 					SetRand(int.Parse(param[1]), int.Parse(param[2]), active, activeReverse);
 				}
-				else
-				{
-					active.Data = param[0];
-				}
+
+				active.Data = param[0];
 
 				if (i % 2 == 0)
 				{
@@ -217,8 +239,21 @@ namespace DeSerialize
 				}
 			}
 
-			activeHead.Prev.Next = activeTail.Next;
-			activeTail.Next.Prev = activeHead.Prev;
+			activeHead = activeHead.Prev;
+			activeTail = activeTail.Next;
+
+			if (activeHead.Rand == activeHead.Next)
+			{
+				activeHead.Rand = activeTail;
+			}
+
+			if (activeTail.Rand == activeTail.Prev)
+			{
+				activeTail.Rand = activeHead;
+			}
+
+			activeHead.Next = activeTail;
+			activeTail.Prev = activeHead;
 		}
 
 		private void SetRand(int delta, int n, ListNode activeLocal, ListNode activeReverse)
@@ -269,51 +304,78 @@ namespace DeSerialize
 			ListNode activeReverseHead = activeReverse;
 			ListNode activeReverseTail = activeReverse;
 
-			for (int i = 0; i < Count; i += 6)
+			int i = 0;
+
+			while (activeHead != null ||
+				activeTail != null ||
+				activeLocalHead != null ||
+				activeLocalTail != null ||
+				activeReverseHead != null ||
+				activeReverseTail != null)
 			{
 				if (find == activeHead)
 				{
 					delta = (int)Active.Head;
-					n = i / 4;
+					n = i;
 					return;
 				}
 				if (find == activeTail)
 				{
 					delta = (int)Active.Tail;
-					n = -i / 4;
+					n = -i;
 					return;
 				}
 				if (find == activeLocalHead)
 				{
 					delta = (int)Active.Local;
-					n = i / 4;
-					return;
-				}
-				if (find == activeLocalTail)
-				{
-					delta = (int)Active.Local;
-					n = -i / 4;
+					n = i;
 					return;
 				}
 				if (find == activeReverseHead)
 				{
 					delta = (int)Active.Reverse;
-					n = i / 4;
+					n = i;
+					return;
+				}
+				if (find == activeLocalTail)
+				{
+					delta = (int)Active.Local;
+					n = -i;
 					return;
 				}
 				if (find == activeReverseTail)
 				{
 					delta = (int)Active.Reverse;
-					n = -i / 4;
+					n = -i;
 					return;
 				}
 
-				activeHead = activeHead.Next;
-				activeTail = activeTail.Prev;
-				activeLocalHead = activeLocalHead.Next;
-				activeLocalTail = activeLocalTail.Prev;
-				activeReverseHead = activeReverseHead.Next;
-				activeReverseTail = activeReverseTail.Prev;
+				i++;
+
+				if (activeHead != null)
+				{
+					activeHead = activeHead.Next;
+				}
+				if (activeTail != null)
+				{
+					activeTail = activeTail.Prev;
+				}
+				if (activeLocalHead != null)
+				{
+					activeLocalHead = activeLocalHead.Next;
+				}
+				if (activeLocalTail != null)
+				{
+					activeLocalTail = activeLocalTail.Prev;
+				}
+				if (activeReverseHead != null)
+				{
+					activeReverseHead = activeReverseHead.Next;
+				}
+				if (activeReverseTail != null)
+				{
+					activeReverseTail = activeReverseTail.Prev;
+				}
 			}
 		}
 	}
