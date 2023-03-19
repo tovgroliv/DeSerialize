@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 
 namespace DeSerialize
@@ -47,6 +48,11 @@ namespace DeSerialize
 		public ListNode Tail;
 		public int Count;
 
+		enum Active
+		{
+			Head = 0, Local = 1, Reverse = 2, Tail = 3
+		}
+
 		public void Serialize(StreamWriter s)
 		{
 			ListNode activeHead = Head;
@@ -74,7 +80,7 @@ namespace DeSerialize
 
 					FindDelta(ref delta, ref n, active, activeReverse);
 
-					output = $"{output} | {delta} | {n}";
+					output = $"{output}|{delta}|{n}";
 				}
 
 				s.WriteLine(output);
@@ -92,17 +98,106 @@ namespace DeSerialize
 
 		public void Deserialize(StreamReader s)
 		{
-			
-		}
-
-		private void FindDelta(ref int delta, ref int n, ListNode active, ListNode activeReverse)
-		{
-			ListNode find = active.Rand;
+			Count = int.Parse(s.ReadLine());
+			Head = new ListNode();
+			Tail = new ListNode();
 
 			ListNode activeHead = Head;
 			ListNode activeTail = Tail;
-			ListNode activeLocalHead = active;
-			ListNode activeLocalTail = active;
+
+			for (int i = 0; i < Count; i++)
+			{
+				ListNode active = activeTail;
+				ListNode activeReverse = activeHead;
+
+				if (i % 2 == 0)
+				{
+					active = activeHead;
+					activeReverse = activeTail;
+				}
+
+				string input = s.ReadLine();
+
+				string[] param = input.Split('|');
+
+				if (param.Length == 3)
+				{
+					SetRand(int.Parse(param[1]), int.Parse(param[2]), active, activeReverse);
+				}
+				else
+				{
+					active.Data = param[0];
+				}
+
+				if (i % 2 == 0)
+				{
+					if (active.Next == null)
+					{
+						active.Next = new ListNode();
+						active.Next.Prev = active;
+					}
+					activeHead = active.Next;
+				}
+				else
+				{
+					if (active.Prev == null)
+					{
+						active.Prev = new ListNode();
+						active.Prev.Next = active;
+					}
+					activeTail = active.Prev;
+				}
+			}
+
+			activeHead.Next = activeTail;
+			activeTail.Prev = activeHead;
+		}
+
+		private void SetRand(int delta, int n, ListNode activeLocal, ListNode activeReverse)
+		{
+			ListNode active = activeLocal;
+
+			switch ((Active)delta)
+			{
+				case Active.Head: active = Head; break;
+				case Active.Local: active = activeLocal; break;
+				case Active.Reverse: active = activeReverse; break;
+				case Active.Tail: active = Tail; break;
+			}
+
+			for (int i = 0; i < Math.Abs(n); i++)
+			{
+				if (n < 0)
+				{
+					if (active.Prev == null)
+					{
+						active.Prev = new ListNode();
+						active.Prev.Next = active;
+					}
+					active = active.Prev;
+				}
+				else
+				{
+					if (active.Next == null)
+					{
+						active.Next = new ListNode();
+						active.Next.Prev = active;
+					}
+					active = active.Next;
+				}
+			}
+
+			activeLocal.Rand = active;
+		}
+
+		private void FindDelta(ref int delta, ref int n, ListNode activeLocal, ListNode activeReverse)
+		{
+			ListNode find = activeLocal.Rand;
+
+			ListNode activeHead = Head;
+			ListNode activeTail = Tail;
+			ListNode activeLocalHead = activeLocal;
+			ListNode activeLocalTail = activeLocal;
 			ListNode activeReverseHead = activeReverse;
 			ListNode activeReverseTail = activeReverse;
 
@@ -110,37 +205,37 @@ namespace DeSerialize
 			{
 				if (find == activeHead)
 				{
-					delta = 0;
+					delta = (int)Active.Head;
 					n = i / 4;
 					return;
 				}
 				if (find == activeTail)
 				{
-					delta = 0;
+					delta = (int)Active.Tail;
 					n = -i / 4;
 					return;
 				}
 				if (find == activeLocalHead)
 				{
-					delta = 1;
+					delta = (int)Active.Local;
 					n = i / 4;
 					return;
 				}
 				if (find == activeLocalTail)
 				{
-					delta = 1;
+					delta = (int)Active.Local;
 					n = -i / 4;
 					return;
 				}
 				if (find == activeReverseHead)
 				{
-					delta = 2;
+					delta = (int)Active.Reverse;
 					n = i / 4;
 					return;
 				}
 				if (find == activeReverseTail)
 				{
-					delta = 2;
+					delta = (int)Active.Reverse;
 					n = -i / 4;
 					return;
 				}
