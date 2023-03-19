@@ -193,8 +193,8 @@ namespace DeSerialize
 				}
 			}
 
-			activeHead.Next = activeTail;
-			activeTail.Prev = activeHead;
+			activeHead.Prev.Next = activeTail.Next;
+			activeTail.Next.Prev = activeHead.Prev;
 		}
 
 		private void SetRand(int delta, int n, ListNode activeLocal, ListNode activeReverse)
