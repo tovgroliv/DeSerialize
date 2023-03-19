@@ -14,6 +14,7 @@ namespace DeSerialize
 				list.Push(i.ToString());
 			}
 
+			list.Randomize();
 			list.Print();
 
 			string path = "dump.txt";
@@ -95,6 +96,29 @@ namespace DeSerialize
 			}
 
 			Count++;
+		}
+
+		public void Randomize()
+		{
+			ListNode active = Head;
+			Random random = new Random();
+
+			for (int i = 0; i < Count; i++)
+			{
+				if (random.Next(0, 2) == 1)
+				{
+					int id = random.Next(0, Count);
+
+					ListNode rand = Head;
+					for (int j = 0; j < id; j++)
+					{
+						rand = rand.Next;
+					}
+					active.Rand = rand;
+				}
+
+				active = active.Next;
+			}
 		}
 
 		public void Serialize(StreamWriter s)
