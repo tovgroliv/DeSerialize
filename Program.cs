@@ -14,6 +14,8 @@ namespace DeSerialize
 				list.Push(i.ToString());
 			}
 
+			list.Print();
+
 			string path = "dump.txt";
 
 			if (File.Exists(path))
@@ -21,7 +23,10 @@ namespace DeSerialize
 				File.Delete(path);
 			}
 
-			File.Create(path);
+			using (File.Create(path))
+			{
+
+			}
 
 			using (StreamWriter s = new StreamWriter(path))
 			{
@@ -32,6 +37,9 @@ namespace DeSerialize
 			{
 				list.Deserialize(s);
 			}
+			list.Print();
+
+			Console.ReadKey();
 		}
 	}
 
@@ -52,6 +60,22 @@ namespace DeSerialize
 		enum Active
 		{
 			Head = 0, Local = 1, Reverse = 2, Tail = 3
+		}
+
+		public void Print()
+		{
+			ListNode active = Head;
+			for (int i = 0; i < Count; i++)
+			{
+				string rand = "";
+				if (active.Rand != null)
+				{
+					rand = $"({active.Rand.Data})";
+				}
+				Console.Write($"{active.Data}{rand} ");
+				active = active.Next;
+			}
+			Console.WriteLine();
 		}
 
 		public void Push(string data)
