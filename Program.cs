@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 
 namespace DeSerialize
 {
@@ -10,7 +9,10 @@ namespace DeSerialize
 		{
 			ListRand list = new ListRand();
 
-			// TODO заполнить список (мб рандом?)
+			for (int i = 0; i < 10; i++)
+			{
+				list.Push(i.ToString());
+			}
 
 			string path = "dump.txt";
 
@@ -41,7 +43,6 @@ namespace DeSerialize
 		public string Data;
 	}
 
-
 	class ListRand
 	{
 		public ListNode Head;
@@ -51,6 +52,25 @@ namespace DeSerialize
 		enum Active
 		{
 			Head = 0, Local = 1, Reverse = 2, Tail = 3
+		}
+
+		public void Push(string data)
+		{
+			if (Count == 0)
+			{
+				Head = new ListNode();
+				Head.Data = data;
+				Tail = Head;
+			}
+			else
+			{
+				Tail.Next = new ListNode();
+				Tail.Next.Prev = Tail;
+				Tail = Tail.Next;
+				Tail.Data = data;
+			}
+
+			Count++;
 		}
 
 		public void Serialize(StreamWriter s)
@@ -249,5 +269,4 @@ namespace DeSerialize
 			}
 		}
 	}
-
 }
