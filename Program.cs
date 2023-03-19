@@ -18,14 +18,16 @@ namespace DeSerialize
 				File.Delete(path);
 			}
 
-			using (FileStream fs = File.Create(path))
+			File.Create(path);
+
+			using (StreamWriter s = new StreamWriter(path))
 			{
-				list.Serialize(fs);
+				list.Serialize(s);
 			}
 
-			using (FileStream fs = File.OpenRead(path))
+			using (StreamReader s = new StreamReader(path))
 			{
-				list.Deserialize(fs);
+				list.Deserialize(s);
 			}
 		}
 	}
@@ -45,12 +47,12 @@ namespace DeSerialize
 		public ListNode Tail;
 		public int Count;
 
-		public void Serialize(FileStream s)
+		public void Serialize(StreamWriter s)
 		{
 			ListNode activeHead = Head;
 			ListNode activeTail = Tail;
 
-			AddText(s, $"{Count}\n");
+			s.WriteLine(Count);
 
 			for (int i = 0; i < Count; i++)
 			{
@@ -63,21 +65,17 @@ namespace DeSerialize
 
 				string output = active.Data;
 
-				if (active.Rand == null)
-				{
-					output += "\n";
-				}
-				else
+				if (active.Rand != null)
 				{
 					bool delta = true;
 					int n = 0;
 
 					FindDelta(ref delta, ref n, active);
 
-					output = $"{output} | {delta} | {n}\n";
+					output = $"{output} | {delta} | {n}";
 				}
 
-				AddText(s, output);
+				s.WriteLine(output);
 
 				if (i % 2 == 0)
 				{
@@ -90,7 +88,7 @@ namespace DeSerialize
 			}
 		}
 
-		public void Deserialize(FileStream s)
+		public void Deserialize(StreamReader s)
 		{
 			
 		}
@@ -136,12 +134,6 @@ namespace DeSerialize
 				activeLocalHead = activeLocalHead.Next;
 				activeLocalTail = activeLocalTail.Prev;
 			}
-		}
-
-		private void AddText(FileStream fs, string value)
-		{
-			byte[] info = new UTF8Encoding(true).GetBytes(value);
-			fs.Write(info, 0, info.Length);
 		}
 	}
 
