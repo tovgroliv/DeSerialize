@@ -57,20 +57,22 @@ namespace DeSerialize
 			for (int i = 0; i < Count; i++)
 			{
 				ListNode active = activeTail;
+				ListNode activeReverse = activeHead;
 
 				if (i % 2 == 0)
 				{
 					active = activeHead;
+					activeReverse = activeTail;
 				}
 
 				string output = active.Data;
 
 				if (active.Rand != null)
 				{
-					bool delta = true;
+					int delta = 0;
 					int n = 0;
 
-					FindDelta(ref delta, ref n, active);
+					FindDelta(ref delta, ref n, active, activeReverse);
 
 					output = $"{output} | {delta} | {n}";
 				}
@@ -93,7 +95,7 @@ namespace DeSerialize
 			
 		}
 
-		private void FindDelta(ref bool delta, ref int n, ListNode active)
+		private void FindDelta(ref int delta, ref int n, ListNode active, ListNode activeReverse)
 		{
 			ListNode find = active.Rand;
 
@@ -101,30 +103,44 @@ namespace DeSerialize
 			ListNode activeTail = Tail;
 			ListNode activeLocalHead = active;
 			ListNode activeLocalTail = active;
+			ListNode activeReverseHead = activeReverse;
+			ListNode activeReverseTail = activeReverse;
 
-			for (int i = 0; i < Count; i += 4)
+			for (int i = 0; i < Count; i += 6)
 			{
 				if (find == activeHead)
 				{
-					delta = false;
+					delta = 0;
 					n = i / 4;
 					return;
 				}
 				if (find == activeTail)
 				{
-					delta = false;
+					delta = 0;
 					n = -i / 4;
 					return;
 				}
 				if (find == activeLocalHead)
 				{
-					delta = true;
+					delta = 1;
 					n = i / 4;
 					return;
 				}
 				if (find == activeLocalTail)
 				{
-					delta = true;
+					delta = 1;
+					n = -i / 4;
+					return;
+				}
+				if (find == activeReverseHead)
+				{
+					delta = 2;
+					n = i / 4;
+					return;
+				}
+				if (find == activeReverseTail)
+				{
+					delta = 2;
 					n = -i / 4;
 					return;
 				}
@@ -133,6 +149,8 @@ namespace DeSerialize
 				activeTail = activeTail.Prev;
 				activeLocalHead = activeLocalHead.Next;
 				activeLocalTail = activeLocalTail.Prev;
+				activeReverseHead = activeReverseHead.Next;
+				activeReverseTail = activeReverseTail.Prev;
 			}
 		}
 	}
