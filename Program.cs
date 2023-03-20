@@ -1,13 +1,20 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace DeSerialize
 {
+	/// <summary>
+	/// Основной класс программы
+	/// </summary>
 	class Program
 	{
+		/// <summary>
+		/// Стартовая функция выполнения программы.
+		/// </summary>
+		/// <param name="args">Входные аргументы</param>
 		static void Main(string[] args)
 		{
-			for (int i = 0; i < 100; i++)
+			for (int i = 0; i < 1000; i++)
 			{
 				Test(i);
 			}
@@ -15,6 +22,10 @@ namespace DeSerialize
 			Console.ReadKey();
 		}
 
+		/// <summary>
+		/// Проведение тестирования работы списка.
+		/// </summary>
+		/// <param name="number">Порядковый номер теста</param>
 		static void Test(int number)
 		{
 			Console.Write($"Test #{number} - ");
@@ -22,7 +33,7 @@ namespace DeSerialize
 			ListRand list = new ListRand();
 			Random rand = new Random();
 
-			for (int i = 0; i < rand.Next(10, 20); i++)
+			for (int i = 0; i < rand.Next(5, 20); i++)
 			{
 				list.Push(i.ToString());
 			}
@@ -39,7 +50,7 @@ namespace DeSerialize
 
 			using (File.Create(path))
 			{
-				
+
 			}
 
 			using (StreamWriter s = new StreamWriter(path))
@@ -66,25 +77,78 @@ namespace DeSerialize
 		}
 	}
 
+	/// <summary>
+	/// Элемент списка
+	/// </summary>
 	class ListNode
 	{
+		/// <summary>
+		/// Предыдущий элемент.
+		/// </summary>
 		public ListNode Prev;
+		/// <summary>
+		/// Следующий элемент.
+		/// </summary>
 		public ListNode Next;
+		/// <summary>
+		/// Случайный элемент.
+		/// </summary>
 		public ListNode Rand;
+		/// <summary>
+		/// Данные элемента.
+		/// </summary>
 		public string Data;
 	}
 
+	/// <summary>
+	/// Список
+	/// </summary>
 	class ListRand
 	{
+		/// <summary>
+		/// Первый элемент списка.
+		/// </summary>
 		public ListNode Head;
+		/// <summary>
+		/// Последний элемент списка.
+		/// </summary>
 		public ListNode Tail;
+		/// <summary>
+		/// Количество элементов в списке.
+		/// </summary>
 		public int Count;
 
-		enum Active
+		/// <summary>
+		/// Перечисление местоположения указателя активного элемента.
+		/// </summary>
+		private enum Active
 		{
-			Head = 0, Local = 1, Reverse = 2, Tail = 3
+			/// <summary>
+			/// Начало списка.
+			/// </summary>
+			Head = 0,
+			/// <summary>
+			/// Текущий элемент.
+			/// </summary>
+			Local = 1,
+			/// <summary>
+			/// Обратный элемент текущему (равно удален, только с другого конца).
+			/// </summary>
+			Reverse = 2,
+			/// <summary>
+			/// Конец списка.
+			/// </summary>
+			Tail = 3
 		}
 
+		/// <summary>
+		/// Преобразование списка в строку.
+		/// Формат data или data|delta|n,
+		///		где data - данные элемента списка (string),
+		///			delta - точка начало отсчета (Active),
+		///			n - сдвиг от точки начала отсчета (int).
+		/// </summary>
+		/// <returns>Представление списка в строке.</returns>
 		public override string ToString()
 		{
 			string output = "";
@@ -103,6 +167,11 @@ namespace DeSerialize
 			return output;
 		}
 
+		/// <summary>
+		/// Добавить элемент в конец списка.
+		/// Используется для тестового представления данных.
+		/// </summary>
+		/// <param name="data">Данные элемента списка.</param>
 		public void Push(string data)
 		{
 			if (Count == 0)
@@ -122,6 +191,10 @@ namespace DeSerialize
 			Count++;
 		}
 
+		/// <summary>
+		/// Добавлен случайных указателей в список.
+		/// Используется для тестового представления данных.
+		/// </summary>
 		public void Randomize()
 		{
 			ListNode active = Head;
@@ -145,6 +218,10 @@ namespace DeSerialize
 			}
 		}
 
+		/// <summary>
+		/// Сериализация списка.
+		/// </summary>
+		/// <param name="s">Поток в который записывается список</param>
 		public void Serialize(StreamWriter s)
 		{
 			ListNode activeHead = Head;
@@ -188,6 +265,10 @@ namespace DeSerialize
 			}
 		}
 
+		/// <summary>
+		/// Десериализация списка.
+		/// </summary>
+		/// <param name="s">Поток из которого читается список</param>
 		public void Deserialize(StreamReader s)
 		{
 			Count = int.Parse(s.ReadLine());
@@ -221,7 +302,12 @@ namespace DeSerialize
 
 				if (i % 2 == 0)
 				{
-					if (active.Next == null)
+					if (i == Count - 2)
+					{
+						activeHead.Next = activeTail;
+						activeTail.Prev = activeHead;
+					}
+					else if (active.Next == null)
 					{
 						active.Next = new ListNode();
 						active.Next.Prev = active;
@@ -230,7 +316,12 @@ namespace DeSerialize
 				}
 				else
 				{
-					if (active.Prev == null)
+					if (i == Count - 2)
+					{
+						activeHead.Next = activeTail;
+						activeTail.Prev = activeHead;
+					}
+					else if (active.Prev == null)
 					{
 						active.Prev = new ListNode();
 						active.Prev.Next = active;
@@ -238,24 +329,15 @@ namespace DeSerialize
 					activeTail = active.Prev;
 				}
 			}
-
-			activeHead = activeHead.Prev;
-			activeTail = activeTail.Next;
-
-			if (activeHead.Next.Rand != null)
-			{
-				activeHead.Rand = activeTail;
-			}
-
-			if (activeTail.Prev.Rand != null)
-			{
-				activeTail.Rand = activeHead;
-			}
-
-			activeHead.Next = activeTail;
-			activeTail.Prev = activeHead;
 		}
 
+		/// <summary>
+		/// Поиск и установка рандомного указателя.
+		/// </summary>
+		/// <param name="delta">Точка начала отсчета</param>
+		/// <param name="n">Смещение от начала отсчета</param>
+		/// <param name="activeLocal">Текущий элемент</param>
+		/// <param name="activeReverse">Обратный элемент текущему</param>
 		private void SetRand(int delta, int n, ListNode activeLocal, ListNode activeReverse)
 		{
 			ListNode active = activeLocal;
@@ -293,6 +375,13 @@ namespace DeSerialize
 			activeLocal.Rand = active;
 		}
 
+		/// <summary>
+		/// Нахождение смещения до рандомного указателя.
+		/// </summary>
+		/// <param name="delta">Изменяемое значение точки начала отсчета</param>
+		/// <param name="n">Изменяемое значение смещения от точки начала отсчета</param>
+		/// <param name="activeLocal">Текущий элемент</param>
+		/// <param name="activeReverse">Обратный элемент текущему</param>
 		private void FindDelta(ref int delta, ref int n, ListNode activeLocal, ListNode activeReverse)
 		{
 			ListNode find = activeLocal.Rand;
