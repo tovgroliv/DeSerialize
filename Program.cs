@@ -242,12 +242,12 @@ namespace DeSerialize
 			activeHead = activeHead.Prev;
 			activeTail = activeTail.Next;
 
-			if (activeHead.Rand == activeHead.Next)
+			if (activeHead.Next.Rand != null)
 			{
 				activeHead.Rand = activeTail;
 			}
 
-			if (activeTail.Rand == activeTail.Prev)
+			if (activeTail.Prev.Rand != null)
 			{
 				activeTail.Rand = activeHead;
 			}
@@ -331,16 +331,16 @@ namespace DeSerialize
 					n = i;
 					return;
 				}
-				if (find == activeReverseHead)
-				{
-					delta = (int)Active.Reverse;
-					n = i;
-					return;
-				}
 				if (find == activeLocalTail)
 				{
 					delta = (int)Active.Local;
 					n = -i;
+					return;
+				}
+				if (find == activeReverseHead)
+				{
+					delta = (int)Active.Reverse;
+					n = i;
 					return;
 				}
 				if (find == activeReverseTail)
